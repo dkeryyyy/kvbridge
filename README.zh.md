@@ -1,109 +1,62 @@
-# KVBridge Offload Study — v0.1 研究版
+# KVBridge
 
-[English](README.md) · [复现边界](docs/reproducibility.md) · [源码与数据来源](docs/provenance.md) · [验证状态](VALIDATION.md) · [变更记录](CHANGELOG.md) · [贡献说明](CONTRIBUTING.md) · [MIT 许可](LICENSE)
+[English](README.md) · 中文
 
-本项目整理了把 KV 注意力从 Apple Silicon Mac 迁至 RTX 4060 Laptop 的研究，附带一个**固定几何的实验性 CUDA 注意力库**。包括 SIMT 参考核、张量核候选、合成示例，以及成功、失败和负结果的部分历史数据。
+**能不能让另一台电脑的显卡，帮 Mac 分担运行大模型的内存和计算压力？**
 
-**验证状态：原集成研究系统已经构建并实测；本独立包经过抽取与 v0.1 修订，当前版本的 CUDA 库构建、GPU 数值测试及 sanitizer 检查仍未验证。下列历史成绩不等于当前独立源码的成绩。**
+这是我做 KVBridge 时想回答的问题。我试着把 Mac 上大模型的一部分注意力计算，交给 Windows 电脑上的 NVIDIA 显卡，并记录它到底快不快、值不值得。
 
-**本地macOS/AppleClang 21的host-only CMake/CTest已通过：98项形状、15项CLI、6,149项oracle辅助逻辑检查；host AddressSanitizer/UndefinedBehaviorSanitizer亦通过。** 精确范围见[验证状态](VALIDATION.md)。
+这个仓库公开研究过程中写的 CUDA 代码、部分测试数据，以及成功和失败的经验。研究暂时到这里，以 **v0.1 研究版**分享给有兴趣的人。
 
-## 包含什么
+## 为什么做这个实验？
 
-- 分页 INT8 GQA 注意力、split-K 部分结果与 merge，CUDA 内存由调用方管理。
-- SIMT 参考核与 BF16 QK / FP16 PV、FP32 累加的 MMA 候选；当前源码包含后续 PV 权重 FP16 hi/lo 修改。
-- 有界合成示例和小型 FP64 oracle 自测入口，不加载模型、不启动远端服务。
-- 精选 JSON/CSV 证据及专题总结。**不含**原推理引擎、模型权重、远端服务、保护监督器或完整历史实验框架。
+大模型处理长对话或长文档时，会保存一份叫作 **KV 缓存**的中间数据，方便生成后续内容时使用。输入越长，这份缓存占用的内存通常越多。
 
-这是研究版，不是通用注意力后端，也不是可直接启动的 Mac/Windows 卸载产品。
+我的想法是：如果让另一台电脑保存并处理其中一部分，能否减轻 Mac 的负担，同时保持可接受的生成速度？
 
-## 历史成果与边界
-
-| 范围 | 结果 | 证据边界 |
-| --- | --- | --- |
-| 早期 attention v2-07 基准 | 65,536 tokens：SIMT 7.8141ms，MMA 2.3951ms，约3.26倍 | RTX 4060 Laptop、合成输入、正扫中位数；早于当前 hi/lo 源码。[原记录](data/att-bench-65536-v2-07.json)。 |
-| service v10 注意力卸载 | 64k 下，1个选定注意力层保留95.7%基线decode速度，5层保留54.1% | DFlash2 B8、512输出tokens，与同轮基线比较；本地backing仍保留。[专题](docs/whole-layer-1to5-64k.zh.md)。 |
-| 协议客户端测量 | 客户端RTT中位4.098ms，服务端窗口3.227ms，成对“传输＋客户端残余”0.867ms | 0.867ms不是单独测出的网线时间；与另一客户端相差约6ms是定位线索，因果未证。[数据](data/blackbox-session-05-analysis.json)。 |
-| 含权重的5个完整decoder层 | CUDA 40.271872ms，Mac 4.081718ms | 同短历史组件快照，仅2次CUDA重放，不是整模型生成速度；带宽推论受硬件、B8与权重流量假设限制。[专题](docs/segment-validation-five-layer.zh.md)。 |
-| KV容量算术 | 每个注意力层每token 2,080B | 4 KV heads、dim256的INT8 K/V＋FP32 scales，不含scratch、页表、运行时和储备。[容量表](data/kv-memory-table.csv)。 |
-
-研究经验是分别测量计算、协议开销和实际物理内存释放。不能据此断言权重卸载普遍不可能，或KV卸载必然提速。
-
-## 构建与验证
-
-历史集成实验使用 **Windows、RTX 4060 Laptop（sm_89）、CUDA 13.3.1**。本包默认目标为sm_89；其他GPU、系统与CUDA版本均未验证，指令存在不等于兼容性验收。还需CMake 3.20+与兼容的C++17主机编译器；工具链不随包提供。
-
-无需CUDA也可运行[host-only检查](docs/reproducibility.md#host-only-checks)，覆盖形状/尺寸、CLI和参考计算辅助逻辑；它们不验证GPU实现。发布完整性检查需要Python 3.9+及标准库：
-
-```sh
-python3 tools/validate_release.py
+```text
+Mac：运行大模型
+  │
+  ├─ 把一部分注意力计算交给 Windows 显卡
+  │
+  └─ 收回结果，继续生成
 ```
 
-它检查本地链接、JSON、文件哈希和部分历史算术，不执行CUDA，也不修改manifest。
+实验用的是 Apple Silicon Mac 和一台配有 RTX 4060 Laptop 显卡的 Windows 电脑。
 
-以下是拟定的CUDA验证流程，**不是已成功执行的命令记录**。从包根目录运行，先读[复现与资源说明](docs/reproducibility.md)。
+## 最后发现了什么？
 
-```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_ARCHITECTURES=89
-cmake --build build --config Release --parallel 2
-```
+**显卡上的局部计算可以加快，但两台电脑合起来运行，并不一定更快。**
 
-单配置生成器：
+- **优化显卡代码确实有效。** 一次早期的独立注意力测试中，计算时间从约 7.81 毫秒降到 2.40 毫秒，约快了 3.26 倍。这是特定版本、合成输入的结果，不代表整个模型加速了这么多。[测试记录](docs/attention-kernel-mma.zh.md)
+- **分出去的工作越多，整体速度损失可能越大。** 在约 6.5 万 token 的上下文测试中，迁出一个注意力层后，生成速度约为原来的 96%；迁出五个后，约为 54%。通信和软件开销也必须算进去。[完整结果](docs/whole-layer-1to5-64k.zh.md)
+- **这次还没有真正省下 Mac 的对应内存。** 实验保留了 Mac 上原有的缓存内存，因此不能把它当作已经解决内存不足的方案。
 
-```sh
-./build/attention_bench --self-test
-./build/attention_bench --tokens 8192 --warmup 8 --iters 32
-```
+这些结果来自当时的实验系统。它们说明了这套实现的得失，也给后续研究留下了线索；不能直接推广到所有模型和硬件。
 
-Windows多配置生成器的可执行文件通常为`build/Release/attention_bench.exe`。先通过小型数值和内存检查，再增加到`--tokens 65536`。CLI提供`--tokens`（256的倍数，256–65,536）、`--warmup`（0–32）、`--iters`（1–256）、`--self-test`，精确校验以示例源码为准。新结果须记录实际工具链、设备、命令、退出状态和源哈希；数值失败的运行不能进入性能胜者表。
+## 仓库里有什么？
 
-## API与内存合同
-
-接口见[attention_common.h](include/kvbridge/attention_common.h)。示例负责buffer与event生命周期，库启动器不代调用方分配。
-
-对已验证的`Shape s`，至少分配：
-
-| 输出 | float元素数 |
-| --- | ---: |
-| `m`、`l`各自 | `s.rows * s.q_heads` |
-| `n` | `s.rows * s.q_heads * s.dim` |
-| `scratch` | `kvbridge::scratch_elements(s)` |
-
-分母为正时，归一化输出为`n[(row*q_heads+head)*dim+d] / l[row*q_heads+head]`；空范围或没有可见key时原始约定为`m=-inf, l=0, n=0`，不能除以零；示例把归一化向量视为零。页表条目、容量、位置及device指针必须符合头文件布局。
-
-MMA仅面向INT8 KV、8 query rows、每KV head对应6 query heads、dim256、Page32和页对齐的`begin`。Q以FP32传入，但预期数值域要求其值能用BF16精确表示。完整形状和启动限制以源码为准。
-
-**`launch_attention_mma`没有自动回退。** 不支持的形状或shared-memory opt-in失败会抛异常。`attention_mma_supported`只是几何检查，不证明设备能力、分配成功或数值资格；调用方可在验证参考路径限制后显式选择`launch_attention`。
-
-## 数值口径
-
-全部signed INT8码值都能在K的BF16、V的FP16暂存中精确表示。QK的scale在dot后FP32应用；PV则先在FP32中计算softmax权重乘V scale，再分成FP16 hi/lo。hi/lo减少误差，不是精确运算，也不提供覆盖极小值/溢出等情况的统一相对误差保证。
-
-须区分三类证据：
-
-1. 随包v2-07 JSON检查的是拼接的 **`n/m/l`**，normalized RMS约`1.283e-5`，不是当前hi/lo核的`n/l`验证。
-2. 后来的v10集成报告记录了非零query的FP64资格：单FP16-P版本失败，hi/lo通过；随包有[脱敏指标摘要](data/v10-oracle-summary.json)，不含原输出张量和完整资格工具。
-3. 当前独立示例检查归一化 **`n/l`**，另设小型oracle自测，**当前GPU结果尚未验证**，且新非零query合成生成器不同于历史基准。未来通过也只覆盖该fixture，不等于完整服务或模型资格。
-
-验收规则与记录要求见[内核设计](docs/kernel-design.md)、[复现说明](docs/reproducibility.md)。
-
-## 文档索引
-
-| 文档 | 内容 |
+| 内容 | 可以拿来做什么 |
 | --- | --- |
-| [reproducibility](docs/reproducibility.md) | 可复核范围、验证流程和缺失工件 |
-| [provenance](docs/provenance.md) | 源码沿革、公开数据索引、许可边界 |
-| [kernel-design](docs/kernel-design.md) | 布局、形状、算术、所有权 |
-| [MMA优化](docs/attention-kernel-mma.zh.md) | v2-03至v2-07历史优化与平台期 |
-| [早期MMA](docs/attention-kernel-mma-early.zh.md) | 布局错误、向量读和fragment装配 |
-| [1–5层注意力卸载](docs/whole-layer-1to5-64k.zh.md) | 集成服务曲线与本地backing保留 |
-| [协议计时](docs/blackbox-timing-split.zh.md) | 客户端/服务端测量与因果边界 |
-| [完整五层组件](docs/segment-validation-five-layer.zh.md) | 连续decoder段实测与失败 |
-| [整段可行性](docs/segment-feasibility-review.zh.md) | 条件带宽估算与容量/速度取舍 |
-| [Q8线性核](docs/linear-kernels-q8.zh.md) | 独立投影实验，不属于本包库实现 |
+| [CUDA 代码](src/)与[接口](include/kvbridge/) | 研究显卡上的注意力计算实现 |
+| [示例程序](examples/attention_bench.cu) | 查看怎样用人工生成的数据比较两种实现 |
+| [测试数据](data/) | 查看部分历史成绩，重新核对统计结果 |
+| [研究文档](docs/technical-reference.zh.md) | 了解实现细节、失败尝试和实验限制 |
 
-## 局限与许可
+仓库不包含模型权重、完整推理引擎或两台电脑之间的服务程序，因此下载后不能直接启动整套卸载系统。
 
-本库不含模型加载、网络、页归属、资源准入、训练反向或生产集成。历史保护器未打包；调用方须提供分配上限、所有权、同步、取消和清理。长上下文容量、物理内存收益及其他硬件性能仍需新证据。
+## 从哪里开始？
 
-许可为[MIT](LICENSE)；CUDA、工具链及另行获取的模型遵守各自条款。[来源说明](docs/provenance.md)列出已查范围；本包许可不宣称拥有第三方工具或研究成果。
+想了解研究过程，可以先看[一到五层的实验结果](docs/whole-layer-1to5-64k.zh.md)，再看[时间花在了哪里](docs/blackbox-timing-split.zh.md)。
+
+想读代码或自己尝试，可以看[技术说明](docs/technical-reference.zh.md)和[构建、测试指南（英文）](docs/reproducibility.md)。查看数据和运行 CPU 检查不需要模型或显卡。
+
+想下载固定版本，可以到 [v0.1.0 发布页](https://github.com/dkeryyyy/kvbridge/releases/tag/v0.1.0) 获取源码包。
+
+## 当前状态
+
+**这是研究源码，不是开箱即用的软件。** 原实验系统做过实测；整理后的独立 CUDA 程序没有重新编译和做 GPU 验证。CPU 测试和数据校验已通过，具体范围见[验证状态](VALIDATION.md)。
+
+我暂时不再继续跑实验，也不承诺持续维护。欢迎有兴趣的人参考、复现或继续探索；提交修改可看[贡献说明](CONTRIBUTING.md)。
+
+采用 [MIT 许可证](LICENSE)。代码和数据的出处见[来源说明](docs/provenance.md)。

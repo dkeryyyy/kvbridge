@@ -30,13 +30,13 @@
     },
     {
       "path": "README.md",
-      "bytes": 10246,
-      "sha256": "96fb80128242295fdc747dfb650ba485b3f94026d50a685225edfd3e800a33dc"
+      "bytes": 4413,
+      "sha256": "2d1b152992712a3d44f539e84a4af5f8d47edefffd26c979674b49487e16ebe1"
     },
     {
       "path": "README.zh.md",
-      "bytes": 8335,
-      "sha256": "fb9376c23ae7feb3edb3c0d84a2103c76a94f7fffce677c4f794d7f1a628b781"
+      "bytes": 3833,
+      "sha256": "c6b37474260a7a1b4a493af293bfb3fdec8cdbd0835705912b511d1ba5920097"
     },
     {
       "path": "VALIDATION.md",
@@ -134,6 +134,16 @@
       "sha256": "1670e40f5ca102a515801764b1613bab03e71d92cfae03ec1bcb6e8652acc8a4"
     },
     {
+      "path": "docs/technical-reference.md",
+      "bytes": 6859,
+      "sha256": "ddc20e819ded1cb816e28c3094fbe2c0b00e8eb096d40bd1ecbb2d260e9dff6a"
+    },
+    {
+      "path": "docs/technical-reference.zh.md",
+      "bytes": 5461,
+      "sha256": "15b7b1b1a56953a7b4d620e9971f30cf369cedb12e59e3845403354817123942"
+    },
+    {
       "path": "docs/whole-layer-1to5-64k.zh.md",
       "bytes": 3226,
       "sha256": "4e777d2db1cb4fd768b1fbd60746f6377f17ab3ee9a2ba07207dae08a0027159"
@@ -224,6 +234,6 @@
       "sha256": "5a2e9aa5dcbef2ded3fb707fb85463c53bc140bf9b3a0e33da0ddd1178f12b2a"
     }
   ],
-  "total_files": 44,
-  "total_bytes": 324962
+  "total_files": 46,
+  "total_bytes": 326947
 }

@@ -1,0 +1,639 @@
+{
+  "schema": "kvbridge-offload-study.historical-v10-oracle-summary.v1",
+  "prepared_date": "2026-10-14",
+  "evidence_kind": "sanitized extraction of existing GPU qualification records; no new experiment",
+  "scope": {
+    "historical_subject": "service_v10 resident DLL, not this standalone release executable",
+    "source_path_base": "research repository root; referenced private harness files are not shipped in this package",
+    "input": "deterministic synthetic INT8 KV with nonzero BF16-exact query values; not a model capture",
+    "reference": "streamed float64 CPU oracle using explicit non-BLAS einsum contractions",
+    "same_data_formula_source": {
+      "repository_relative_path": "work/bridge/service_v10/gpu_qualify.py",
+      "sha256": "bd3e580bf243a4753882ef2f357af69e070af62e520ae6b8fd21a0b2ae91cba3",
+      "bytes": 17940
+    },
+    "original_historical_report": {
+      "repository_relative_path": "results/whole-layer-20261012/report-v10-mma-1to5.zh.md",
+      "sha256": "89fa2140d94c9232fe8657477241d9e5a83e490e65d3ecb5268f60c4cd8cc86b",
+      "bytes": 5750
+    },
+    "new_standalone_package_gpu_validation": false,
+    "raw_tensor_outputs_included": false,
+    "historical_dispatch_source": {
+      "repository_relative_path": "work/bridge/service_v10/native/partial_attention.cu",
+      "sha256": "f3e70962a19bf06510e28f239647bdcfc1a8b80ab82079c8d7d6c1163b752643",
+      "bytes": 16994
+    }
+  },
+  "metric_definitions": {
+    "max_abs_max": "max(abs(CUDA m - float64 oracle m))",
+    "max_abs_denominator": "max(abs(CUDA l - float64 oracle l))",
+    "max_abs_numerator": "max(abs(CUDA n - float64 oracle n))",
+    "max_abs_normalized": "max(abs((CUDA n / CUDA l) - (oracle n / oracle l))); maximum absolute error of normalized attention output, not normalized RMS",
+    "pass": "All m/l/n and n/l elementwise frozen tolerance checks passed. The reported maxima alone do not recreate every elementwise comparison."
+  },
+  "frozen_acceptance": {
+    "defined_before_historical_device_execution": true,
+    "formula": "abs(actual-reference) <= atol + rtol * abs(reference), for every element",
+    "cuda_statistics_finite_required": true,
+    "reference_finite_required": true,
+    "m": {
+      "rtol": 2e-05,
+      "atol": 2e-05
+    },
+    "l": {
+      "rtol": 3e-05,
+      "atol": 0.0001
+    },
+    "n": {
+      "rtol": 0.0001,
+      "atol": 0.005
+    },
+    "n_div_l": {
+      "rtol": 5e-05,
+      "atol": 3e-06
+    },
+    "note": "The absolute tolerance is not a standalone global max-error ceiling; the relative term also applies."
+  },
+  "failed_single_fp16_p": {
+    "source": {
+      "repository_relative_path": "results/whole-layer-20261012/cuda-qualification-v10-01/gpu-worker-cleanup.json",
+      "sha256": "086a16a6a807154c3dcef8740ddd30a6fddfda7f2ab51f72666c8b3bf957f35b",
+      "bytes": 6508
+    },
+    "historical_variant_label": "single-fp16 PV weights (before hi/lo repair), as identified by the historical report",
+    "historical_dll_sha256": "e863f89b00d2d4331778e1e1b76f25389ef2bde5b50e9b3a5a47f997f9b9f656",
+    "historical_qualifier_sha256": "bd3e580bf243a4753882ef2f357af69e070af62e520ae6b8fd21a0b2ae91cba3",
+    "case": "boundary-31-rows-8",
+    "shape": {
+      "rows": 8,
+      "q_heads": 24,
+      "kv_heads": 4,
+      "head_dim": 256,
+      "page_tokens": 32,
+      "capacity_tokens": 128,
+      "committed_history_tokens": 31,
+      "visible_end_tokens": 39
+    },
+    "status": "FAILED",
+    "metrics": {
+      "max_abs_max": 0.0,
+      "max_abs_denominator": 5.0177326471612105e-06,
+      "max_abs_numerator": 0.0008106414471329426,
+      "max_abs_normalized": 2.5192769458679334e-05,
+      "pass": false,
+      "tolerances_frozen": true
+    },
+    "interpretation": "The frozen elementwise oracle check failed; this failure is preserved and was not repaired by widening tolerances."
+  },
+  "passed_hi_lo": {
+    "source": {
+      "repository_relative_path": "results/whole-layer-20261012/cuda-qualification-v10-02/gpu-worker-cleanup.json",
+      "sha256": "13b9e12c0c370cf614eefba1f99939a82d71b233a7b4074914923c4012d4e84e",
+      "bytes": 51249
+    },
+    "historical_variant_label": "fp16 hi/lo PV weights, as identified by the historical report",
+    "historical_dll_sha256": "df3d21fc16b9c59cae9c0d810bbef3395aa405ce5843650aea3869ee7725c12c",
+    "historical_qualifier_sha256": "bd3e580bf243a4753882ef2f357af69e070af62e520ae6b8fd21a0b2ae91cba3",
+    "device": {
+      "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "compute_capability": "8.9"
+    },
+    "status": "PASS_NATIVE_CUDA_WHOLE_QUERY_SMALL_POOL",
+    "small_pool_cases": [
+      {
+        "source_case_index": 0,
+        "case": "boundary-31-rows-8",
+        "poison_after": null,
+        "shape": {
+          "dtype": "int8",
+          "head_dim": 256,
+          "kv_heads": 4,
+          "page_tokens": 32,
+          "q_heads": 24,
+          "rows": 8,
+          "scale": 0.0625,
+          "native_configured_rows": 8,
+          "capacity_tokens": 128
+        },
+        "committed_history_tokens": 31,
+        "visible_end_tokens": 39,
+        "metrics": {
+          "max_abs_denominator": 5.0177326471612105e-06,
+          "max_abs_max": 0.0,
+          "max_abs_normalized": 4.1347114010728547e-07,
+          "max_abs_numerator": 1.5653186110520245e-05,
+          "pass": true,
+          "tolerances_frozen": true
+        }
+      },
+      {
+        "source_case_index": 1,
+        "case": "boundary-31-rows-8",
+        "poison_after": 31,
+        "shape": {
+          "dtype": "int8",
+          "head_dim": 256,
+          "kv_heads": 4,
+          "page_tokens": 32,
+          "q_heads": 24,
+          "rows": 8,
+          "scale": 0.0625,
+          "native_configured_rows": 8,
+          "capacity_tokens": 128
+        },
+        "committed_history_tokens": 31,
+        "visible_end_tokens": 39,
+        "metrics": {
+          "max_abs_denominator": 3.8116184697400968e-06,
+          "max_abs_max": 0.0,
+          "max_abs_normalized": 6.194678672244436e-06,
+          "max_abs_numerator": 0.00023785249936736363,
+          "pass": true,
+          "tolerances_frozen": true
+        }
+      },
+      {
+        "source_case_index": 2,
+        "case": "boundary-32-rows-8",
+        "poison_after": null,
+        "shape": {
+          "dtype": "int8",
+          "head_dim": 256,
+          "kv_heads": 4,
+          "page_tokens": 32,
+          "q_heads": 24,
+          "rows": 8,
+          "scale": 0.0625,
+          "native_configured_rows": 8,
+          "capacity_tokens": 128
+        },
+        "committed_history_tokens": 32,
+        "visible_end_tokens": 40,
+        "metrics": {
+          "max_abs_denominator": 4.803827962973628e-06,
+          "max_abs_max": 0.0,
+          "max_abs_normalized": 3.9624717674234533e-07,
+          "max_abs_numerator": 1.5159101539596875e-05,
+          "pass": true,
+          "tolerances_frozen": true
+        }
+      },
+      {
+        "source_case_index": 3,
+        "case": "boundary-40-rows-1",
+        "poison_after": null,
+        "shape": {
+          "dtype": "int8",
+          "head_dim": 256,
+          "kv_heads": 4,
+          "page_tokens": 32,
+          "q_heads": 24,
+          "rows": 1,
+          "scale": 0.0625,
+          "native_configured_rows": 8,
+          "capacity_tokens": 128
+        },
+        "committed_history_tokens": 40,
+        "visible_end_tokens": 41,
+        "metrics": {
+          "max_abs_denominator": 3.1923327270533264e-06,
+          "max_abs_max": 0.0,
+          "max_abs_normalized": 1.617978660078956e-08,
+          "max_abs_numerator": 6.14245792229795e-07,
+          "pass": true,
+          "tolerances_frozen": true
+        }
+      },
+      {
+        "source_case_index": 4,
+        "case": "boundary-64-rows-8",
+        "poison_after": null,
+        "shape": {
+          "dtype": "int8",
+          "head_dim": 256,
+          "kv_heads": 4,
+          "page_tokens": 32,
+          "q_heads": 24,
+          "rows": 8,
+          "scale": 0.0625,
+          "native_configured_rows": 8,
+          "capacity_tokens": 128
+        },
+        "committed_history_tokens": 64,
+        "visible_end_tokens": 72,
+        "metrics": {
+          "max_abs_denominator": 9.655042518375012e-06,
+          "max_abs_max": 0.0,
+          "max_abs_normalized": 3.279503364003386e-07,
+          "max_abs_numerator": 2.0969483594424077e-05,
+          "pass": true,
+          "tolerances_frozen": true
+        }
+      },
+      {
+        "source_case_index": 5,
+        "case": "boundary-0-rows-1",
+        "poison_after": null,
+        "shape": {
+          "dtype": "int8",
+          "head_dim": 256,
+          "kv_heads": 4,
+          "page_tokens": 32,
+          "q_heads": 24,
+          "rows": 1,
+          "scale": 0.0625,
+          "native_configured_rows": 8,
+          "capacity_tokens": 64
+        },
+        "committed_history_tokens": 0,
+        "visible_end_tokens": 1,
+        "metrics": {
+          "max_abs_denominator": 0.0,
+          "max_abs_max": 0.0,
+          "max_abs_normalized": 0.0,
+          "max_abs_numerator": 0.0,
+          "pass": true,
+          "tolerances_frozen": true
+        }
+      }
+    ],
+    "future_poison_row0_bitwise_same": true,
+    "pre_dispatch_rejections": [
+      "zero_rows",
+      "too_many_rows",
+      "stale_version",
+      "stale_boundary"
+    ],
+    "failed_workspace_result_not_adopted": true,
+    "long_history_sweeps": [
+      {
+        "source": {
+          "repository_relative_path": "results/whole-layer-20261012/cuda-qualification-v10-02/sweep-1-1x65536.json",
+          "sha256": "13b1a5ccc1a4bab94e43bc1b1a163e139b9f5b1d24475ae44067f7886292645c",
+          "bytes": 21702
+        },
+        "sweep": 1,
+        "layer_count": 1,
+        "history_tokens_per_layer": 65536,
+        "shape": {
+          "rows": 8,
+          "q_heads": 24,
+          "kv_heads": 4,
+          "head_dim": 256,
+          "page_tokens": 32,
+          "dtype": "int8",
+          "query": "deterministic nonzero BF16-exact fixture"
+        },
+        "oracle_checks": [
+          {
+            "layer_index_within_sweep": 0,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.006214055458258372,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 5.471519431529736e-09,
+              "max_abs_numerator": 0.00034520915960489784,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          }
+        ],
+        "oracle_checks_count": 1,
+        "source_query_records": 14,
+        "oracle_checked_every_timing_sample": false,
+        "status": "PASS"
+      },
+      {
+        "source": {
+          "repository_relative_path": "results/whole-layer-20261012/cuda-qualification-v10-02/sweep-1-2x32768.json",
+          "sha256": "1a5ec53fc207440725c5792570b2ba70b4d8d3e9f12dc2fcd9c6c7e2b32df3d2",
+          "bytes": 36370
+        },
+        "sweep": 1,
+        "layer_count": 2,
+        "history_tokens_per_layer": 32768,
+        "shape": {
+          "rows": 8,
+          "q_heads": 24,
+          "kv_heads": 4,
+          "head_dim": 256,
+          "page_tokens": 32,
+          "dtype": "int8",
+          "query": "deterministic nonzero BF16-exact fixture"
+        },
+        "oracle_checks": [
+          {
+            "layer_index_within_sweep": 0,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.003166320308082504,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 9.370699204147624e-09,
+              "max_abs_numerator": 0.0002937700401847154,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          },
+          {
+            "layer_index_within_sweep": 1,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.003166320308082504,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 9.370699204147624e-09,
+              "max_abs_numerator": 0.0002937700401847154,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          }
+        ],
+        "oracle_checks_count": 2,
+        "source_query_records": 28,
+        "oracle_checked_every_timing_sample": false,
+        "status": "PASS"
+      },
+      {
+        "source": {
+          "repository_relative_path": "results/whole-layer-20261012/cuda-qualification-v10-02/sweep-1-4x16384.json",
+          "sha256": "4fd9db21a8117d9387580b00bdbac255d67da9dd8d1cf98d2afe90fe7790ddbf",
+          "bytes": 66237
+        },
+        "sweep": 1,
+        "layer_count": 4,
+        "history_tokens_per_layer": 16384,
+        "shape": {
+          "rows": 8,
+          "q_heads": 24,
+          "kv_heads": 4,
+          "head_dim": 256,
+          "page_tokens": 32,
+          "dtype": "int8",
+          "query": "deterministic nonzero BF16-exact fixture"
+        },
+        "oracle_checks": [
+          {
+            "layer_index_within_sweep": 0,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.0014823410601820797,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 1.8031492309098385e-08,
+              "max_abs_numerator": 0.000285538441804567,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          },
+          {
+            "layer_index_within_sweep": 1,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.0014823410601820797,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 1.8031492309098385e-08,
+              "max_abs_numerator": 0.000285538441804567,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          },
+          {
+            "layer_index_within_sweep": 2,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.0014823410601820797,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 1.8031492309098385e-08,
+              "max_abs_numerator": 0.000285538441804567,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          },
+          {
+            "layer_index_within_sweep": 3,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.0014823410601820797,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 1.8031492309098385e-08,
+              "max_abs_numerator": 0.000285538441804567,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          }
+        ],
+        "oracle_checks_count": 4,
+        "source_query_records": 56,
+        "oracle_checked_every_timing_sample": false,
+        "status": "PASS"
+      },
+      {
+        "source": {
+          "repository_relative_path": "results/whole-layer-20261012/cuda-qualification-v10-02/sweep-2-1x65536.json",
+          "sha256": "dc62bb6e355da4db860b8fd30fa1f528bd5b0d2657bc92d6fe5f8f2ab58988c6",
+          "bytes": 21721
+        },
+        "sweep": 2,
+        "layer_count": 1,
+        "history_tokens_per_layer": 65536,
+        "shape": {
+          "rows": 8,
+          "q_heads": 24,
+          "kv_heads": 4,
+          "head_dim": 256,
+          "page_tokens": 32,
+          "dtype": "int8",
+          "query": "deterministic nonzero BF16-exact fixture"
+        },
+        "oracle_checks": [
+          {
+            "layer_index_within_sweep": 0,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.006214055458258372,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 5.471519431529736e-09,
+              "max_abs_numerator": 0.00034520915960489784,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          }
+        ],
+        "oracle_checks_count": 1,
+        "source_query_records": 14,
+        "oracle_checked_every_timing_sample": false,
+        "status": "PASS"
+      },
+      {
+        "source": {
+          "repository_relative_path": "results/whole-layer-20261012/cuda-qualification-v10-02/sweep-2-2x32768.json",
+          "sha256": "cdf5b606aa3241459d3695538626cec31d4b1d217b32f4263caab7c32f6d1f01",
+          "bytes": 36783
+        },
+        "sweep": 2,
+        "layer_count": 2,
+        "history_tokens_per_layer": 32768,
+        "shape": {
+          "rows": 8,
+          "q_heads": 24,
+          "kv_heads": 4,
+          "head_dim": 256,
+          "page_tokens": 32,
+          "dtype": "int8",
+          "query": "deterministic nonzero BF16-exact fixture"
+        },
+        "oracle_checks": [
+          {
+            "layer_index_within_sweep": 0,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.003166320308082504,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 9.370699204147624e-09,
+              "max_abs_numerator": 0.0002937700401847154,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          },
+          {
+            "layer_index_within_sweep": 1,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.003166320308082504,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 9.370699204147624e-09,
+              "max_abs_numerator": 0.0002937700401847154,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          }
+        ],
+        "oracle_checks_count": 2,
+        "source_query_records": 28,
+        "oracle_checked_every_timing_sample": false,
+        "status": "PASS"
+      },
+      {
+        "source": {
+          "repository_relative_path": "results/whole-layer-20261012/cuda-qualification-v10-02/sweep-2-4x16384.json",
+          "sha256": "6e0f84b8a87f39ef27ea02724eb0bbff3b599c5c493c5c90cab978d7f4024399",
+          "bytes": 66252
+        },
+        "sweep": 2,
+        "layer_count": 4,
+        "history_tokens_per_layer": 16384,
+        "shape": {
+          "rows": 8,
+          "q_heads": 24,
+          "kv_heads": 4,
+          "head_dim": 256,
+          "page_tokens": 32,
+          "dtype": "int8",
+          "query": "deterministic nonzero BF16-exact fixture"
+        },
+        "oracle_checks": [
+          {
+            "layer_index_within_sweep": 0,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.0014823410601820797,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 1.8031492309098385e-08,
+              "max_abs_numerator": 0.000285538441804567,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          },
+          {
+            "layer_index_within_sweep": 1,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.0014823410601820797,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 1.8031492309098385e-08,
+              "max_abs_numerator": 0.000285538441804567,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          },
+          {
+            "layer_index_within_sweep": 2,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.0014823410601820797,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 1.8031492309098385e-08,
+              "max_abs_numerator": 0.000285538441804567,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          },
+          {
+            "layer_index_within_sweep": 3,
+            "cycle": 0,
+            "warmup": true,
+            "metrics": {
+              "max_abs_denominator": 0.0014823410601820797,
+              "max_abs_max": 0.0,
+              "max_abs_normalized": 1.8031492309098385e-08,
+              "max_abs_numerator": 0.000285538441804567,
+              "pass": true,
+              "tolerances_frozen": true
+            }
+          }
+        ],
+        "oracle_checks_count": 4,
+        "source_query_records": 56,
+        "oracle_checked_every_timing_sample": false,
+        "status": "PASS"
+      }
+    ],
+    "summary": {
+      "small_pool_case_count": 6,
+      "small_pool_max_abs_normalized": 6.194678672244436e-06,
+      "long_history_sweep_count": 6,
+      "long_history_oracle_check_count": 14,
+      "long_history_max_abs_normalized": 1.8031492309098385e-08,
+      "combined_max_abs_normalized": 6.194678672244436e-06,
+      "all_recorded_oracle_checks_pass": true,
+      "scope_correction": "The often quoted 1.80e-8 is the maximum only across long-history sweep oracle checks. The complete recorded set also includes a poisoned small-pool case at 6.194678672244436e-6, which passes the unchanged relative-plus-absolute contract."
+    }
+  },
+  "redaction": {
+    "omitted": [
+      "absolute local and remote paths",
+      "run identifiers and nonces",
+      "PIDs and process identities",
+      "wall and monotonic clock values",
+      "network addresses",
+      "NVML readings",
+      "resource receipts and unrelated cleanup records"
+    ],
+    "preserved": [
+      "research-relative source paths",
+      "whole-source SHA256 and byte counts",
+      "historical DLL and qualifier SHA256",
+      "shape and case identity",
+      "original numerical metrics and pass results"
+    ]
+  },
+  "limitations": [
+    "This file is an extraction, not a rerun or independent audit of the numerical implementation.",
+    "Historical DLL results do not qualify the repaired standalone library/example or establish its performance.",
+    "Per-sweep oracle checks were performed on the first cycle per layer; other timing cycles were checked for repeatability, not independently re-evaluated with the float64 oracle.",
+    "The original raw m/l/n output tensors are not included here; the original reported metric summaries and source file hashes are preserved.",
+    "Small-pool shape.rows is the actual query row count parsed from the recorded case identity. native_configured_rows and capacity_tokens describe the native cache configuration; rows=1 cases do not exercise the rows=8-only MMA route."
+  ]
+}

@@ -1,0 +1,54 @@
+Start testing: Oct 14 01:36 HKT
+----------------------------------------------------------
+1/3 Testing: attention_shape_test
+1/3 Test: attention_shape_test
+Command: "<host-build>/attention_shape_test"
+Directory: <host-build>
+"attention_shape_test" start time: Oct 14 01:36 HKT
+Output:
+----------------------------------------------------------
+PASS 98 host shape/API checks (no CUDA)
+<end of output>
+Test time =   0.48 sec
+----------------------------------------------------------
+Test Passed.
+"attention_shape_test" end time: Oct 14 01:36 HKT
+"attention_shape_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/3 Testing: attention_bench_options_test
+2/3 Test: attention_bench_options_test
+Command: "<host-build>/attention_bench_options_test"
+Directory: <host-build>
+"attention_bench_options_test" start time: Oct 14 01:36 HKT
+Output:
+----------------------------------------------------------
+15 CLI checks passed
+<end of output>
+Test time =   0.48 sec
+----------------------------------------------------------
+Test Passed.
+"attention_bench_options_test" end time: Oct 14 01:36 HKT
+"attention_bench_options_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/3 Testing: attention_reference_test
+3/3 Test: attention_reference_test
+Command: "<host-build>/attention_reference_test"
+Directory: <host-build>
+"attention_reference_test" start time: Oct 14 01:36 HKT
+Output:
+----------------------------------------------------------
+6149 oracle checks passed
+<end of output>
+Test time =   0.86 sec
+----------------------------------------------------------
+Test Passed.
+"attention_reference_test" end time: Oct 14 01:36 HKT
+"attention_reference_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 14 01:36 HKT
+
+host-only =   1.82 sec*proc
+

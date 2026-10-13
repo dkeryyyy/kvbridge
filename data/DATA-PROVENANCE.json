@@ -1,0 +1,122 @@
+{
+  "schema": "kvbridge-offload-study.data-provenance.v1",
+  "source_path_base": "original research repository root, unless provenance_kind is embedded; original research paths are identifiers, not files shipped in the release",
+  "scope": "Source SHA binds historical file identity, not correctness, model quality, physical residency, cleanup or validation of this standalone package.",
+  "entries": [
+    {
+      "path": "data/att-bench-65536-v2-07.json",
+      "evidence_kind": "historical_synthetic_gpu_measurement",
+      "source_files": [
+        {
+          "repository_relative_path": "results/segment-20261012/att-v7-bench-01/worker/bench-att-65536.json",
+          "sha256": "131f3c9ee60711d40e6093f5b67724bb2b933f97ae57768a4785b0d7cf7136fa",
+          "bytes": 15261
+        }
+      ],
+      "transformation": "JSON reserialization only; JSON values compare equal. Earlier v2-07 kernel, not the current standalone hi/lo executable."
+    },
+    {
+      "path": "data/blackbox-session-05-ops.json",
+      "evidence_kind": "historical_duration_export",
+      "source_files": [
+        {
+          "repository_relative_path": "results/whole-layer-20261012/blackbox-diag-01/session-05/diag-ops.json",
+          "sha256": "6ed2305f03ac984fdc0ec69697e817fa15a5af2e302491feddd9100384379b5a",
+          "bytes": 94760
+        },
+        {
+          "repository_relative_path": "results/whole-layer-20261012/blackbox-diag-01/session-05/server-log.jsonl",
+          "sha256": "14a9840b91e0d489d529ede6f551b73e29a1dd472814ab6c1eb5dc9792fab9e3",
+          "bytes": 1916472
+        }
+      ],
+      "transformation": "One-to-one request_id join, then remove identifiers/absolute clocks/receipt; preserve all operation and native durations; append three same-operation relative durations. See export transformation object."
+    },
+    {
+      "path": "data/blackbox-session-05-analysis.json",
+      "evidence_kind": "historical_rounded_duration_statistics",
+      "source_files": [
+        {
+          "repository_relative_path": "results/whole-layer-20261012/blackbox-diag-01/session-05/analysis.json",
+          "sha256": "78d21c8c567e8f3c19b96a347dab1648982b26d83650e4e7b4e484cb23edd1dc",
+          "bytes": 481
+        }
+      ],
+      "transformation": "Byte-identical copy. Recomputed by tools/check_blackbox.py from public duration rows; first five cycles excluded, median/p95 rounded to 3 decimals."
+    },
+    {
+      "path": "data/matrix-02-summary.json",
+      "evidence_kind": "historical_integrated_model_run_summary",
+      "source_files": [
+        {
+          "repository_relative_path": "results/whole-layer-20261012/matrix-02/summary.json",
+          "sha256": "880f6f46245b6461c1d2cc9024ca59b5d351fb685098800cf37591eac303ec2b",
+          "bytes": 12452
+        }
+      ],
+      "transformation": "Byte-identical copy; original overall failure retained alongside completed rows. Not a completed paired reverse-sweep matrix."
+    },
+    {
+      "path": "data/matrix-06-summary.json",
+      "evidence_kind": "historical_integrated_model_run_summary",
+      "source_files": [
+        {
+          "repository_relative_path": "results/whole-layer-20261012/matrix-06/summary.json",
+          "sha256": "302b3a0d6a019743923ed3f9b1795dd663000b336278fe42830816ecaa4bcce1",
+          "bytes": 8586
+        }
+      ],
+      "transformation": "Byte-identical copy of separate 4/5-layer continuation. Not standalone kernel validation."
+    },
+    {
+      "path": "data/kv-memory-table.json",
+      "evidence_kind": "arithmetic_estimate_not_measurement",
+      "source_files": [
+        {
+          "repository_relative_path": "results/open-source-v0.1-preparation-20261014/package-before/data/kv-memory-table.json",
+          "sha256": "cbf7a504190277e234c043cf9e6efd198cc67f804dd4fca7ad70202b8d28ce60",
+          "bytes": 2082
+        }
+      ],
+      "transformation": "Unchanged original export archived before v0.1 preparation. No separate original generator was located; values are reproducible from the stated formula.",
+      "calculation": {
+        "measured": false,
+        "bytes_per_token_per_layer": 2080,
+        "formula": "2 * 256 dims * 4 KV heads * 1 byte INT8 + 2 * 4 KV heads * 4 bytes FP32 scale = 2080 bytes",
+        "per_layer_bytes": "tokens * 2080",
+        "per_layer_MiB": "tokens * 2080 / 2**20",
+        "layers_GiB": "round(tokens * 2080 * layers / 2**30, 4)",
+        "excluded": "page tables, allocation/page rounding, runtime and driver overhead, per-query scratch; does not establish residency, physical release, capacity admission or context qualification"
+      }
+    },
+    {
+      "path": "data/kv-memory-table.csv",
+      "evidence_kind": "arithmetic_estimate_not_measurement",
+      "source_files": [
+        {
+          "repository_relative_path": "results/open-source-v0.1-preparation-20261014/package-before/data/kv-memory-table.csv",
+          "sha256": "4b484b7096cd3aac327eab457a9d325105b05b5947295b07ddc550b30e522227",
+          "bytes": 467
+        }
+      ],
+      "transformation": "Unchanged original export archived before v0.1 preparation. No separate original generator was located; values are reproducible from the stated formula.",
+      "calculation": {
+        "measured": false,
+        "bytes_per_token_per_layer": 2080,
+        "formula": "2 * 256 dims * 4 KV heads * 1 byte INT8 + 2 * 4 KV heads * 4 bytes FP32 scale = 2080 bytes",
+        "per_layer_bytes": "tokens * 2080",
+        "per_layer_MiB": "tokens * 2080 / 2**20",
+        "layers_GiB": "round(tokens * 2080 * layers / 2**30, 4)",
+        "excluded": "page tables, allocation/page rounding, runtime and driver overhead, per-query scratch; does not establish residency, physical release, capacity admission or context qualification"
+      }
+    },
+    {
+      "path": "data/v10-oracle-summary.json",
+      "evidence_kind": "sanitized_historical_qualification_summary",
+      "provenance_kind": "embedded",
+      "embedded_provenance_path": "data/v10-oracle-summary.json",
+      "sha256": "fa8f38de45b199b4e9baf30d287579e0e625006757eee0b5b05b4a2b2b12b9b7",
+      "note": "This file already contains individual research-relative sources, hashes, formula source and extraction boundaries. Read its scope and cases; source lists are not duplicated here."
+    }
+  ]
+}

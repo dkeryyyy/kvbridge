@@ -1,0 +1,78 @@
+{
+  "formula": "per token per layer = 2080 bytes = K+V int8 (2*256 dims*4 kv heads*1B) + K/V scales (2*4*4B)",
+  "notes": "does not include page tables (~negligible) or per-query scratch; allocations round up to page/system capacity",
+  "rows": [
+    {
+      "tokens": 32768,
+      "label": "32k",
+      "per_layer_bytes": 68157440,
+      "per_layer_MiB": 65.0,
+      "1_layers_GiB": 0.0635,
+      "2_layers_GiB": 0.127,
+      "3_layers_GiB": 0.1904,
+      "4_layers_GiB": 0.2539,
+      "5_layers_GiB": 0.3174,
+      "16_layers_GiB": 1.0156
+    },
+    {
+      "tokens": 65536,
+      "label": "64k",
+      "per_layer_bytes": 136314880,
+      "per_layer_MiB": 130.0,
+      "1_layers_GiB": 0.127,
+      "2_layers_GiB": 0.2539,
+      "3_layers_GiB": 0.3809,
+      "4_layers_GiB": 0.5078,
+      "5_layers_GiB": 0.6348,
+      "16_layers_GiB": 2.0312
+    },
+    {
+      "tokens": 131072,
+      "label": "128k",
+      "per_layer_bytes": 272629760,
+      "per_layer_MiB": 260.0,
+      "1_layers_GiB": 0.2539,
+      "2_layers_GiB": 0.5078,
+      "3_layers_GiB": 0.7617,
+      "4_layers_GiB": 1.0156,
+      "5_layers_GiB": 1.2695,
+      "16_layers_GiB": 4.0625
+    },
+    {
+      "tokens": 262144,
+      "label": "256Ki",
+      "per_layer_bytes": 545259520,
+      "per_layer_MiB": 520.0,
+      "1_layers_GiB": 0.5078,
+      "2_layers_GiB": 1.0156,
+      "3_layers_GiB": 1.5234,
+      "4_layers_GiB": 2.0312,
+      "5_layers_GiB": 2.5391,
+      "16_layers_GiB": 8.125
+    },
+    {
+      "tokens": 524288,
+      "label": "512Ki",
+      "per_layer_bytes": 1090519040,
+      "per_layer_MiB": 1040.0,
+      "1_layers_GiB": 1.0156,
+      "2_layers_GiB": 2.0312,
+      "3_layers_GiB": 3.0469,
+      "4_layers_GiB": 4.0625,
+      "5_layers_GiB": 5.0781,
+      "16_layers_GiB": 16.25
+    },
+    {
+      "tokens": 1048576,
+      "label": "1Mi",
+      "per_layer_bytes": 2181038080,
+      "per_layer_MiB": 2080.0,
+      "1_layers_GiB": 2.0312,
+      "2_layers_GiB": 4.0625,
+      "3_layers_GiB": 6.0938,
+      "4_layers_GiB": 8.125,
+      "5_layers_GiB": 10.1562,
+      "16_layers_GiB": 32.5
+    }
+  ]
+}

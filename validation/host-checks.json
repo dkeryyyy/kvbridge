@@ -1,0 +1,79 @@
+{
+  "schema": "kvbridge.host-validation.v1",
+  "date": "2026-10-14",
+  "kind": "executed_cpu_only",
+  "platform": "macOS Apple Silicon",
+  "compiler": "AppleClang 21.0.0.21000334",
+  "cmake": "4.4.3",
+  "python_for_package_checks": "3.14.7",
+  "configure_flags": {
+    "KVB_ENABLE_CUDA": "OFF",
+    "BUILD_TESTING": "ON",
+    "CMAKE_CXX_FLAGS": "-Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer"
+  },
+  "build_parallelism": 2,
+  "ctest": {
+    "passed": 3,
+    "failed": 0
+  },
+  "tests": [
+    {
+      "name": "attention_shape_test",
+      "checks": 98,
+      "result": "PASS"
+    },
+    {
+      "name": "attention_bench_options_test",
+      "checks": 15,
+      "result": "PASS"
+    },
+    {
+      "name": "attention_reference_test",
+      "checks": 6149,
+      "result": "PASS"
+    }
+  ],
+  "compiled_sources": [
+    {
+      "path": "CMakeLists.txt",
+      "sha256": "932fa2b7e5db289df288bff41e15fe4fc01735b88944fcf6bf6cf0e5beffa53e"
+    },
+    {
+      "path": "src/attention_shape.cpp",
+      "sha256": "e589173438c9dccd13cf3a67ef78a1b5c43fd92ba5506054b7ed2c97f020a9a6"
+    },
+    {
+      "path": "include/kvbridge/attention_shape.h",
+      "sha256": "01b4a822fd2ba50cd33faaa122ece0d112cdc297508963b4e11025472a060e68"
+    },
+    {
+      "path": "examples/bench_options.h",
+      "sha256": "7af7f2612341cb21d8855e3c8b03d2015535fa0162cff57a550fe12ff91bb055"
+    },
+    {
+      "path": "examples/attention_reference.h",
+      "sha256": "b3a8718ba60e05781539b88b9bcea4e57185fc99b6ac606e9d4490a4ab254266"
+    },
+    {
+      "path": "tests/shape_test.cpp",
+      "sha256": "db2204d1dd6cab58e2b42abad502505a594992418635efad8aafb39730f865a7"
+    },
+    {
+      "path": "tests/bench_options_test.cpp",
+      "sha256": "db86600be990e3d58e59cfcb0168dbf3b8a6a036bdfa0a1692ad02744e092327"
+    },
+    {
+      "path": "tests/reference_test.cpp",
+      "sha256": "bb2f6390d6f826f6f6eab3c6f622dad2d6108d1b8e19aaf9b53e3fda80ec97c1"
+    }
+  ],
+  "not_run": [
+    "NVCC compilation",
+    "GPU execution",
+    "compute-sanitizer",
+    "SSH",
+    "Windows commands",
+    "model execution"
+  ],
+  "scope_note": "Host tests and sanitizers validate host helpers, not CUDA kernel correctness, launch compatibility or GPU cleanup."
+}

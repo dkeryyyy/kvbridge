@@ -1,0 +1,22 @@
+{
+  "joined": 130,
+  "steady": 125,
+  "p50": {
+    "mac_total_ms": 4.098,
+    "server_window_ms": 3.227,
+    "server_dispatch_ms": 2.83,
+    "server_egress_ms": 0.38,
+    "kernel_ms": 2.286,
+    "py_backend_ms": 2.666
+  },
+  "p95": {
+    "mac_total_ms": 4.415,
+    "server_window_ms": 3.443,
+    "server_dispatch_ms": 3.048,
+    "server_egress_ms": 0.401,
+    "kernel_ms": 2.459,
+    "py_backend_ms": 2.85
+  },
+  "transport_residual_p50": 0.867,
+  "transport_residual_p95": 1.04
+}
